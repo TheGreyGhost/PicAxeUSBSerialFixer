@@ -1,4 +1,5 @@
 EESchema Schematic File Version 4
+LIBS:PICAXEfixer-cache
 EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
@@ -30,7 +31,7 @@ U 1 1 5DE8C4EE
 P 4200 2850
 F 0 "R2" V 4400 2800 50  0000 C CNN
 F 1 "10k" V 4300 2850 50  0000 C CNN
-F 2 "Resistor_THT:R_Axial_DIN0922_L20.0mm_D9.0mm_P25.40mm_Horizontal" H 4200 2850 50  0001 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P15.24mm_Horizontal" H 4200 2850 50  0001 C CNN
 F 3 "~" H 4200 2850 50  0001 C CNN
 	1    4200 2850
 	0    1    1    0   
@@ -108,7 +109,7 @@ F 3 "" H 5950 2950 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	5950 4050 5950 4400
+	5950 4050 5950 4200
 Wire Wire Line
 	6250 3050 5950 3050
 $Comp
@@ -221,7 +222,7 @@ U 1 1 6176291C
 P 4450 3600
 F 0 "R1" V 4650 3550 50  0000 C CNN
 F 1 "10k" V 4550 3600 50  0000 C CNN
-F 2 "Resistor_THT:R_Axial_DIN0922_L20.0mm_D9.0mm_P25.40mm_Horizontal" H 4450 3600 50  0001 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P15.24mm_Horizontal" H 4450 3600 50  0001 C CNN
 F 3 "~" H 4450 3600 50  0001 C CNN
 	1    4450 3600
 	-1   0    0    1   
@@ -243,8 +244,6 @@ Wire Wire Line
 Connection ~ 4450 3850
 Wire Wire Line
 	4450 3850 4450 3900
-Wire Wire Line
-	6650 3350 7300 3350
 Wire Wire Line
 	7300 3350 7300 3500
 Wire Wire Line
@@ -276,7 +275,7 @@ U 1 1 61769851
 P 5850 4950
 F 0 "R3" V 6050 4900 50  0000 C CNN
 F 1 "10k" V 5950 4950 50  0000 C CNN
-F 2 "Resistor_THT:R_Axial_DIN0922_L20.0mm_D9.0mm_P25.40mm_Horizontal" H 5850 4950 50  0001 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P15.24mm_Horizontal" H 5850 4950 50  0001 C CNN
 F 3 "~" H 5850 4950 50  0001 C CNN
 	1    5850 4950
 	0    1    1    0   
@@ -292,11 +291,11 @@ Wire Wire Line
 Wire Wire Line
 	4000 3500 4000 4100
 Wire Wire Line
-	3600 4650 3600 4400
+	3600 4650 3600 4550
 Wire Wire Line
 	3400 4650 3600 4650
 Wire Wire Line
-	3500 4750 3500 4900
+	3500 4750 3500 4850
 Wire Wire Line
 	3400 4750 3500 4750
 $Comp
@@ -341,4 +340,63 @@ Wire Wire Line
 NoConn ~ 5250 3650
 NoConn ~ 6650 3650
 NoConn ~ 5250 3500
+$Comp
+L Device:R_Small_US R4
+U 1 1 6177EB51
+P 7150 3350
+F 0 "R4" V 7350 3300 50  0000 C CNN
+F 1 "10k" V 7250 3350 50  0000 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P15.24mm_Horizontal" H 7150 3350 50  0001 C CNN
+F 3 "~" H 7150 3350 50  0001 C CNN
+	1    7150 3350
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	7250 3350 7300 3350
+Wire Wire Line
+	6650 3350 7050 3350
+$Comp
+L Device:C_Small C2
+U 1 1 61781CDD
+P 6300 4200
+F 0 "C2" V 6071 4200 50  0000 C CNN
+F 1 "100nF" V 6162 4200 50  0000 C CNN
+F 2 "Capacitor_THT:C_Disc_D4.3mm_W1.9mm_P5.00mm" H 6300 4200 50  0001 C CNN
+F 3 "~" H 6300 4200 50  0001 C CNN
+	1    6300 4200
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:CP C1
+U 1 1 617830B4
+P 3850 4700
+F 0 "C1" H 3968 4746 50  0000 L CNN
+F 1 "100uF" H 3968 4655 50  0000 L CNN
+F 2 "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm" H 3888 4550 50  0001 C CNN
+F 3 "~" H 3850 4700 50  0001 C CNN
+	1    3850 4700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3500 4850 3850 4850
+Connection ~ 3500 4850
+Wire Wire Line
+	3500 4850 3500 4900
+Wire Wire Line
+	3850 4550 3600 4550
+Connection ~ 3600 4550
+Wire Wire Line
+	3600 4550 3600 4400
+Wire Wire Line
+	6200 4200 5950 4200
+Connection ~ 5950 4200
+Wire Wire Line
+	5950 4200 5950 4400
+Wire Wire Line
+	6400 4200 6750 4200
+Wire Wire Line
+	6750 4200 6750 3050
+Wire Wire Line
+	6750 3050 6250 3050
+Connection ~ 6250 3050
 $EndSCHEMATC
