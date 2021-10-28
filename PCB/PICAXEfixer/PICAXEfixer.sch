@@ -1,5 +1,4 @@
 EESchema Schematic File Version 4
-LIBS:PICAXEfixer-cache
 EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
@@ -290,14 +289,6 @@ Wire Wire Line
 	4000 4100 4150 4100
 Wire Wire Line
 	4000 3500 4000 4100
-Wire Wire Line
-	3600 4650 3600 4550
-Wire Wire Line
-	3400 4650 3600 4650
-Wire Wire Line
-	3500 4750 3500 4850
-Wire Wire Line
-	3400 4750 3500 4750
 $Comp
 L power:+5P #PWR0108
 U 1 1 6175513A
@@ -361,7 +352,7 @@ U 1 1 61781CDD
 P 6300 4200
 F 0 "C2" V 6071 4200 50  0000 C CNN
 F 1 "100nF" V 6162 4200 50  0000 C CNN
-F 2 "Capacitor_THT:C_Disc_D4.3mm_W1.9mm_P5.00mm" H 6300 4200 50  0001 C CNN
+F 2 "Capacitor_THT:C_Disc_D7.5mm_W5.0mm_P10.00mm" H 6300 4200 50  0001 C CNN
 F 3 "~" H 6300 4200 50  0001 C CNN
 	1    6300 4200
 	0    1    1    0   
@@ -372,7 +363,7 @@ U 1 1 617830B4
 P 3850 4700
 F 0 "C1" H 3968 4746 50  0000 L CNN
 F 1 "100uF" H 3968 4655 50  0000 L CNN
-F 2 "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm" H 3888 4550 50  0001 C CNN
+F 2 "Capacitor_THT:CP_Radial_D10.0mm_P7.50mm" H 3888 4550 50  0001 C CNN
 F 3 "~" H 3850 4700 50  0001 C CNN
 	1    3850 4700
 	1    0    0    -1  
@@ -399,4 +390,12 @@ Wire Wire Line
 Wire Wire Line
 	6750 3050 6250 3050
 Connection ~ 6250 3050
+Wire Wire Line
+	3400 4650 3500 4650
+Wire Wire Line
+	3500 4650 3500 4850
+Wire Wire Line
+	3400 4750 3600 4750
+Wire Wire Line
+	3600 4550 3600 4750
 $EndSCHEMATC
