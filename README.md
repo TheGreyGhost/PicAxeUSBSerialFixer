@@ -30,3 +30,7 @@ Alternatively you can use a PICAXE "SerialFixer" to add a serial break:
       
 When transmission has stopped for 5 seconds, the SerialFixer re-enters the idle state.
 
+The jumper on the SerialFixer board can be used to disable the break, i.e.:
+Jumper installed = insert serial break
+Jumper not installed = passthrough only (do not insert a break)
+

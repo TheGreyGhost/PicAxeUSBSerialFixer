@@ -15,6 +15,11 @@
 '    the transmission to the PICAXE.
 ' 5) Once no transmission has been received for 5 seconds, the PICAXEprogrammer will start sending break
 '     again
+' 
+' A jumper is also provided to disable the serial break, i.e. 
+' Jumper installed = insert serial break
+' Jumper not installed = passthrough only (do not insert a break)
+
 symbol HSEROUT_N_POLARITY = %00010
 symbol HSERIN_T_POLARITY = %00000
 symbol HSEROUT_OFF = %01000
@@ -25,11 +30,16 @@ symbol IDLE_TIME_BEFORE_BREAK_S = 5 ' the serial break will be reestablished aft
 
 symbol hseroutPin = C.0
 
+symbol breakJumper = pinC.3 ' if jumper is installed (bridge to ground) then insert serial break, otherwise don't.
+
 symbol sendingbreak = b0
 symbol byteRX = w1
 symbol byteRXlsb = b2
 symbol lasttime = w2
 symbol delta = w3
+symbol stopbreak = w4
+
+pullup %00001000	' enable pullup on pinC.3
 
 serialbreak:
   HSERSETUP B4800_4, %01010 ' HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_OFF 
@@ -38,7 +48,13 @@ serialbreak:
 	do 
 	  byteRX = $FFFF            ; set up a non-valid value
 	  hserin byteRX             ; receive 1 byte into w1
-	loop while byteRX = $FFFF
+		
+		if byteRX <> $FFFF or breakJumper = 1 then
+			stopbreak = 1
+		else
+		  stopbreak = 0
+		endif
+	loop until stopbreak = 1
 		
 receiving:		
 	low hseroutPin
@@ -54,7 +70,7 @@ waitnext:
 	hserin byteRX             ; receive 1 byte into w1
 	if byteRX = $FFFF then
 		delta = time - lasttime
-		if delta > IDLE_TIME_BEFORE_BREAK_S then
+		if delta > IDLE_TIME_BEFORE_BREAK_S and breakJumper = 0 then
 			goto serialbreak		
 		end if	
 	  goto waitnext

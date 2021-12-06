@@ -116,7 +116,7 @@ L Connector_Generic:Conn_01x03 J1
 U 1 1 6174466F
 P 3200 3500
 F 0 "J1" H 3118 3175 50  0000 C CNN
-F 1 "Conn_01x03" H 3118 3266 50  0000 C CNN
+F 1 "From PC" H 3118 3266 50  0000 C CNN
 F 2 "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" H 3200 3500 50  0001 C CNN
 F 3 "~" H 3200 3500 50  0001 C CNN
 	1    3200 3500
@@ -164,7 +164,7 @@ L Connector_Generic:Conn_01x04 J3
 U 1 1 61755B63
 P 8500 3400
 F 0 "J3" H 8580 3392 50  0000 L CNN
-F 1 "Conn_01x04" H 8580 3301 50  0000 L CNN
+F 1 "To PICAXE" H 8580 3301 50  0000 L CNN
 F 2 "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical" H 8500 3400 50  0001 C CNN
 F 3 "~" H 8500 3400 50  0001 C CNN
 	1    8500 3400
@@ -237,9 +237,9 @@ Wire Wire Line
 Wire Wire Line
 	6850 3500 6850 4950
 Wire Wire Line
-	5050 4950 5050 3850
+	4900 4950 4900 3850
 Wire Wire Line
-	5050 3850 4450 3850
+	4900 3850 4450 3850
 Connection ~ 4450 3850
 Wire Wire Line
 	4450 3850 4450 3900
@@ -280,7 +280,7 @@ F 3 "~" H 5850 4950 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 Wire Wire Line
-	5050 4950 5750 4950
+	4900 4950 5750 4950
 Wire Wire Line
 	5950 4950 6850 4950
 Wire Wire Line
@@ -305,7 +305,7 @@ L Connector_Generic:Conn_01x02 J2
 U 1 1 617470D3
 P 3200 4750
 F 0 "J2" H 3118 4425 50  0000 C CNN
-F 1 "Conn_01x02" H 3118 4516 50  0000 C CNN
+F 1 "Power" H 3118 4516 50  0000 C CNN
 F 2 "Connector_BarrelJack:BarrelJack_Wuerth_6941xx301002" H 3200 4750 50  0001 C CNN
 F 3 "~" H 3200 4750 50  0001 C CNN
 	1    3200 4750
@@ -328,7 +328,6 @@ Wire Wire Line
 	3700 2300 7500 2300
 Wire Wire Line
 	6250 2750 6250 3050
-NoConn ~ 5250 3650
 NoConn ~ 6650 3650
 NoConn ~ 5250 3500
 $Comp
@@ -398,4 +397,30 @@ Wire Wire Line
 	3400 4750 3600 4750
 Wire Wire Line
 	3600 4550 3600 4750
+$Comp
+L power:GNDD #PWR0110
+U 1 1 61A238E2
+P 5100 4075
+F 0 "#PWR0110" H 5100 3825 50  0001 C CNN
+F 1 "GNDD" H 5104 3920 50  0000 C CNN
+F 2 "" H 5100 4075 50  0001 C CNN
+F 3 "" H 5100 4075 50  0001 C CNN
+	1    5100 4075
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:Conn_01x02_Male J4
+U 1 1 61A247ED
+P 4900 3650
+F 0 "J4" H 5008 3831 50  0000 C CNN
+F 1 "Jumper" H 5008 3740 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 4900 3650 50  0001 C CNN
+F 3 "~" H 4900 3650 50  0001 C CNN
+	1    4900 3650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5250 3650 5100 3650
+Wire Wire Line
+	5100 3750 5100 4075
 $EndSCHEMATC
