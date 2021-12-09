@@ -39,7 +39,7 @@ symbol lasttime = w2
 symbol delta = w3
 symbol stopbreak = w4
 
-pullup %00001000	' enable pullup on pinC.3
+'pullup %00001000	' enable pullup on pinC.3
 
 serialbreak:
   HSERSETUP B4800_4, %01010 ' HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_OFF 
@@ -49,7 +49,7 @@ serialbreak:
 	  byteRX = $FFFF            ; set up a non-valid value
 	  hserin byteRX             ; receive 1 byte into w1
 		
-		if byteRX <> $FFFF or breakJumper = 1 then
+		if byteRX <> $FFFF then 'or breakJumper = 1 then
 			stopbreak = 1
 		else
 		  stopbreak = 0
@@ -70,7 +70,7 @@ waitnext:
 	hserin byteRX             ; receive 1 byte into w1
 	if byteRX = $FFFF then
 		delta = time - lasttime
-		if delta > IDLE_TIME_BEFORE_BREAK_S and breakJumper = 0 then
+		if delta > IDLE_TIME_BEFORE_BREAK_S then 'and breakJumper = 0 then
 			goto serialbreak		
 		end if	
 	  goto waitnext
