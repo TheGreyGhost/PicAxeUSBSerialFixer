@@ -20,6 +20,9 @@
 ' Jumper installed = insert serial break
 ' Jumper not installed = passthrough only (do not insert a break)
 
+' 
+
+
 symbol HSEROUT_N_POLARITY = %00010
 symbol HSERIN_T_POLARITY = %00000
 symbol HSEROUT_OFF = %01000
@@ -31,36 +34,55 @@ symbol IDLE_TIME_BEFORE_BREAK_S = 5 ' the serial break will be reestablished aft
 symbol hseroutPin = C.0
 
 symbol breakJumper = pinC.3 ' if jumper is installed (bridge to ground) then insert serial break, otherwise don't.
-
+symbol picaxeReply = pinC.2	' 
 symbol sendingbreak = b0
 symbol byteRX = w1
 symbol byteRXlsb = b2
 symbol lasttime = w2
 symbol delta = w3
-symbol stopbreak = w4
+symbol programdetected = w4
+symbol waittime = w5
 
 'pullup %00001000	' enable pullup on pinC.3
 
-serialbreak:
-  HSERSETUP B4800_4, %01010 ' HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_OFF 
-  high hseroutPin
+dirs = %00001  ' C.0 output (hserout), all others inputs.
 
+'  HSERSETUP B4800_4, %01010 ' HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_OFF 
+
+' algorithm is:
+' 1) Trigger a serial break
+' 2) Wait 10 ms
+' 3) Once the serial reply from PICAXE goes high, set the transmit line low
+' 4) Start serial receive on serin from PC.  Timeout after 2 seconds.
+' 5) If serial was received, continue to relay.  Otherwise, trigger the break again (repeat from 1)
+
+triggerbreak:
+	HSERSETUP B4800_4, %01010 ' HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_OFF 
+	high hseroutPin
+	pause 10
+	do 
+	  let b0 = pins & %100 ' C.2 is reply serial from picaxe being programmed
+	loop until b0 <> 0
+
+waitforfirstprogrambyte:		
+	lasttime = time
+	programdetected = 0
+	low hseroutPin
+  HSERSETUP B4800_4, %00010 'HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_ON
 	do 
 	  byteRX = $FFFF            ; set up a non-valid value
 	  hserin byteRX             ; receive 1 byte into w1
 		
 		if byteRX <> $FFFF then 'or breakJumper = 1 then
-			stopbreak = 1
+			programdetected = 1
 		else
-		  stopbreak = 0
+		  delta = time - lasttime
+		if delta > IDLE_TIME_BEFORE_BREAK_S then 'and breakJumper = 0 then
+			goto triggerbreak		
+		end if	
 		endif
-	loop until stopbreak = 1
-		
-receiving:		
-	low hseroutPin
-	pause ENDBREAK_DELAY_MS
-  HSERSETUP B4800_4, %00010 'HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_ON
-
+	loop until programdetected = 1
+	
 passingthrough:
   hserout 0, (byteRXlsb) ' lsb of w1
 	lasttime = time
@@ -71,12 +93,64 @@ waitnext:
 	if byteRX = $FFFF then
 		delta = time - lasttime
 		if delta > IDLE_TIME_BEFORE_BREAK_S then 'and breakJumper = 0 then
-			goto serialbreak		
+			goto triggerbreak		
 		end if	
 	  goto waitnext
   end if	
 
 	goto passingthrough
+
+
+;	do 
+;	 let b0 = pins & %101000 
+;	  byteRX = $FFFF            ; set up a non-valid value
+;	  hserin byteRX             ; receive 1 byte into w1
+;		
+;		if byteRX <> $FFFF then 'or breakJumper = 1 then
+;			stopbreak = 1
+;		else
+;		  stopbreak = 0
+;		endif
+;	loop until stopbreak = 1
+
+
+
+;serialbreak:
+;  HSERSETUP B4800_4, %01010 ' HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_OFF 
+;  high hseroutPin
+;
+;	do 
+;	  byteRX = $FFFF            ; set up a non-valid value
+;	  hserin byteRX             ; receive 1 byte into w1
+;		
+;		if byteRX <> $FFFF then 'or breakJumper = 1 then
+;			stopbreak = 1
+;		else
+;		  stopbreak = 0
+;		endif
+;	loop until stopbreak = 1
+;		
+;receiving:		
+;	low hseroutPin
+;	pause ENDBREAK_DELAY_MS
+;  HSERSETUP B4800_4, %00010 'HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_ON
+;
+;passingthrough:
+;  hserout 0, (byteRXlsb) ' lsb of w1
+;	lasttime = time
+;	
+;waitnext:
+;  byteRX = $FFFF            ; set up a non-valid value
+;	hserin byteRX             ; receive 1 byte into w1
+;	if byteRX = $FFFF then
+;		delta = time - lasttime
+;		if delta > IDLE_TIME_BEFORE_BREAK_S then 'and breakJumper = 0 then
+;			goto serialbreak		
+;		end if	
+;	  goto waitnext
+;  end if	
+;
+;	goto passingthrough
 
 	
   	
