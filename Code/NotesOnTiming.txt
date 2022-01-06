@@ -1,0 +1,7 @@
+Based on measurements the timing is:
+
+1) When the serial break starts (~ 2ms) the PICAXE being programmed starts responding immediately (1 millisecond or less)
+2) The response takes approxiately 136 milliseconds to complete
+3) When the serial break ends, the PICAXE waits approximately 5 seconds before it stops listening for programming instructions.
+4) Normally The PICAXE programmer responds within about 1400 ms
+

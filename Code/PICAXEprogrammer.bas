@@ -17,11 +17,8 @@
 '     again
 ' 
 ' A jumper is also provided to disable the serial break, i.e. 
-' Jumper installed = insert serial break
-' Jumper not installed = passthrough only (do not insert a break)
-
-' 
-
+' Jumper not installed = insert serial break
+' Jumper installed = passthrough only (do not insert a break)
 
 symbol HSEROUT_N_POLARITY = %00010
 symbol HSERIN_T_POLARITY = %00000
@@ -29,6 +26,7 @@ symbol HSEROUT_OFF = %01000
 symbol HSEROUT_ON = %00000
 
 symbol ENDBREAK_DELAY_MS = 1 '4800 baud -> 1ms ~ 5 bits
+symbol BREAK_WAIT_S = 5 ' the serial break will be reasserted if the PC doesn't establish contact within this time
 symbol IDLE_TIME_BEFORE_BREAK_S = 5 ' the serial break will be reestablished after this length of idle time
 
 symbol hseroutPin = C.0
@@ -57,6 +55,7 @@ dirs = %00001  ' C.0 output (hserout), all others inputs.
 ' 5) If serial was received, continue to relay.  Otherwise, trigger the break again (repeat from 1)
 
 triggerbreak:
+'	if breakJumper = 1 then prepforwaitnext
 	HSERSETUP B4800_4, %01010 ' HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_OFF 
 	high hseroutPin
 	pause 10
@@ -73,11 +72,11 @@ waitforfirstprogrambyte:
 	  byteRX = $FFFF            ; set up a non-valid value
 	  hserin byteRX             ; receive 1 byte into w1
 		
-		if byteRX <> $FFFF then 'or breakJumper = 1 then
+		if byteRX <> $FFFF then 
 			programdetected = 1
 		else
 		  delta = time - lasttime
-		if delta > IDLE_TIME_BEFORE_BREAK_S then 'and breakJumper = 0 then
+		if delta > BREAK_WAIT_S then 
 			goto triggerbreak		
 		end if	
 		endif
@@ -85,6 +84,8 @@ waitforfirstprogrambyte:
 	
 passingthrough:
   hserout 0, (byteRXlsb) ' lsb of w1
+	
+prepforwaitnext:	
 	lasttime = time
 	
 waitnext:
@@ -92,14 +93,13 @@ waitnext:
 	hserin byteRX             ; receive 1 byte into w1
 	if byteRX = $FFFF then
 		delta = time - lasttime
-		if delta > IDLE_TIME_BEFORE_BREAK_S then 'and breakJumper = 0 then
+		if delta > IDLE_TIME_BEFORE_BREAK_S then 
 			goto triggerbreak		
 		end if	
 	  goto waitnext
   end if	
 
 	goto passingthrough
-
 
 ;	do 
 ;	 let b0 = pins & %101000 
