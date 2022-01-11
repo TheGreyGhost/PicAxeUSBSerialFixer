@@ -25,31 +25,18 @@ F 3 "" H 5950 4400 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:R_Small_US R2
-U 1 1 5DE8C4EE
-P 4200 2850
-F 0 "R2" V 4400 2800 50  0000 C CNN
-F 1 "10k" V 4300 2850 50  0000 C CNN
-F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P15.24mm_Horizontal" H 4200 2850 50  0001 C CNN
-F 3 "~" H 4200 2850 50  0001 C CNN
-	1    4200 2850
-	0    1    1    0   
-$EndComp
-$Comp
 L power:GNDD #PWR03
 U 1 1 5DE8FF2C
-P 3950 3000
-F 0 "#PWR03" H 3950 2750 50  0001 C CNN
-F 1 "GNDD" H 3954 2845 50  0000 C CNN
-F 2 "" H 3950 3000 50  0001 C CNN
-F 3 "" H 3950 3000 50  0001 C CNN
-	1    3950 3000
+P 4500 2550
+F 0 "#PWR03" H 4500 2300 50  0001 C CNN
+F 1 "GNDD" H 4504 2395 50  0000 C CNN
+F 2 "" H 4500 2550 50  0001 C CNN
+F 3 "" H 4500 2550 50  0001 C CNN
+	1    4500 2550
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	4100 2850 3950 2850
-Wire Wire Line
-	3950 2850 3950 3000
+	4500 2475 4500 2550
 $Comp
 L power:PWR_FLAG #FLG0101
 U 1 1 5DE94C52
@@ -112,17 +99,6 @@ Wire Wire Line
 Wire Wire Line
 	6250 3050 5950 3050
 $Comp
-L Connector_Generic:Conn_01x03 J1
-U 1 1 6174466F
-P 3200 3500
-F 0 "J1" H 3118 3175 50  0000 C CNN
-F 1 "From PC" H 3118 3266 50  0000 C CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" H 3200 3500 50  0001 C CNN
-F 3 "~" H 3200 3500 50  0001 C CNN
-	1    3200 3500
-	-1   0    0    1   
-$EndComp
-$Comp
 L Transistor_FET:2N7000 Q1
 U 1 1 6174AC5A
 P 4350 4100
@@ -133,10 +109,6 @@ F 3 "https://www.fairchildsemi.com/datasheets/2N/2N7000.pdf" H 4350 4100 50  000
 	1    4350 4100
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	4900 3350 5250 3350
-Wire Wire Line
-	4900 2850 4900 3350
 $Comp
 L power:GNDD #PWR0102
 U 1 1 61754125
@@ -207,12 +179,12 @@ $EndComp
 $Comp
 L power:+5P #PWR0107
 U 1 1 6175FF0E
-P 4450 3300
-F 0 "#PWR0107" H 4450 3150 50  0001 C CNN
-F 1 "+5P" H 4465 3473 50  0000 C CNN
-F 2 "" H 4450 3300 50  0001 C CNN
-F 3 "" H 4450 3300 50  0001 C CNN
-	1    4450 3300
+P 4450 3150
+F 0 "#PWR0107" H 4450 3000 50  0001 C CNN
+F 1 "+5P" H 4465 3323 50  0000 C CNN
+F 2 "" H 4450 3150 50  0001 C CNN
+F 3 "" H 4450 3150 50  0001 C CNN
+	1    4450 3150
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -231,7 +203,7 @@ Wire Wire Line
 Wire Wire Line
 	4450 3700 4450 3850
 Wire Wire Line
-	4450 3300 4450 3500
+	4450 3150 4450 3250
 Wire Wire Line
 	6650 3500 6850 3500
 Wire Wire Line
@@ -264,8 +236,6 @@ F 3 "" H 6250 2750 50  0001 C CNN
 	1    6250 2750
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	4300 2850 4900 2850
 Wire Wire Line
 	7800 1900 7800 2050
 $Comp
@@ -329,7 +299,6 @@ Wire Wire Line
 Wire Wire Line
 	6250 2750 6250 3050
 NoConn ~ 6650 3650
-NoConn ~ 5250 3500
 $Comp
 L Device:R_Small_US R4
 U 1 1 6177EB51
@@ -412,15 +381,93 @@ $Comp
 L Connector:Conn_01x02_Male J4
 U 1 1 61A247ED
 P 4900 3650
-F 0 "J4" H 5008 3831 50  0000 C CNN
-F 1 "Jumper" H 5008 3740 50  0000 C CNN
+F 0 "J4" H 4800 3675 50  0000 C CNN
+F 1 "Jumper" H 4800 3600 50  0000 C CNN
 F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 4900 3650 50  0001 C CNN
 F 3 "~" H 4900 3650 50  0001 C CNN
 	1    4900 3650
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	5250 3650 5100 3650
+	5250 3650 5150 3650
 Wire Wire Line
 	5100 3750 5100 4075
+$Comp
+L Device:R_US R5
+U 1 1 61DD9BBE
+P 4700 3400
+F 0 "R5" H 4768 3446 50  0000 L CNN
+F 1 "10k" H 4768 3355 50  0000 L CNN
+F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P15.24mm_Horizontal" V 4740 3390 50  0001 C CNN
+F 3 "~" H 4700 3400 50  0001 C CNN
+	1    4700 3400
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5150 3650 5150 3550
+Wire Wire Line
+	5150 3550 4700 3550
+Connection ~ 5150 3650
+Wire Wire Line
+	5150 3650 5100 3650
+Wire Wire Line
+	4700 3250 4450 3250
+Connection ~ 4450 3250
+Wire Wire Line
+	4450 3250 4450 3500
+$Comp
+L Device:R_US R6
+U 1 1 61DDE1E2
+P 4025 3300
+F 0 "R6" V 3820 3300 50  0000 C CNN
+F 1 "10k" V 3911 3300 50  0000 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P15.24mm_Horizontal" V 4065 3290 50  0001 C CNN
+F 3 "~" H 4025 3300 50  0001 C CNN
+	1    4025 3300
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	4925 2475 4500 2475
+Wire Wire Line
+	5125 3350 5250 3350
+$Comp
+L Device:R_Small_US R2
+U 1 1 5DE8C4EE
+P 5025 2475
+F 0 "R2" V 5225 2425 50  0000 C CNN
+F 1 "10k" V 5125 2475 50  0000 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P15.24mm_Horizontal" H 5025 2475 50  0001 C CNN
+F 3 "~" H 5025 2475 50  0001 C CNN
+	1    5025 2475
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	5125 2475 5125 3350
+Wire Wire Line
+	3400 3300 3875 3300
+Wire Wire Line
+	4175 3300 4175 2875
+Wire Wire Line
+	4175 2875 5025 2875
+Wire Wire Line
+	5025 2875 5025 3500
+Wire Wire Line
+	5025 3500 5250 3500
+Text Label 3425 3300 0    50   ~ 0
+CTS
+Text Label 3450 3400 0    50   ~ 0
+RxD
+Text Label 3475 3500 0    50   ~ 0
+TxD
+$Comp
+L Connector_Generic:Conn_01x04 J1
+U 1 1 6174466F
+P 3200 3500
+F 0 "J1" H 3118 3175 50  0000 C CNN
+F 1 "From PC" H 3200 3050 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical" H 3200 3500 50  0001 C CNN
+F 3 "~" H 3200 3500 50  0001 C CNN
+	1    3200 3500
+	-1   0    0    1   
+$EndComp
 $EndSCHEMATC

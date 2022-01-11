@@ -5,16 +5,17 @@
 ' How it works:
 ' The TX from the PC is connected to hserin C.1 via an inverter (hserin can only do T = idle high).
 ' hserout C.0 is connected to the serin of the PICAXE to be programmed.
-' The serout of the PICAXE to be programmed is connected directly to the RX to the PC
+' The serout of the PICAXE to be programmed is connected directly to the RX to the PC and also to C.2
 ' 
 ' Step by step:
 ' 1) Connect PC to PICAXEprogrammer and PICAXEprogrammer to the PICAXE to be programmed
-' 2) Power up the PICAXEprogrammer.  It will start sending a serial break
-' 3) Power up the PICAXE to be programmed.
-' 4) Start the program download.  The PICAXEprogrammer will stop sending the break and will pass through
-'    the transmission to the PICAXE.
-' 5) Once no transmission has been received for 5 seconds, the PICAXEprogrammer will start sending break
-'     again
+' 2) Power up the PICAXEprogrammer
+' 2a) Optional: Power up the PICAXE to be programmed, if it doesn't use the disconnect command
+' 3) Start the program download.  The PICAXEprogrammer will start sending a break.
+' 3a) Optional: if the PICAXE to be programmed isn't already on, turn it on now
+' 4) Once the PICAXEprogrammer detects a reply from the PICAXE being programmed, it stops sending break and will pass through
+'    the transmission from the PC to the PICAXE.
+' 5) Once the programming is finished, the PICAXEprogrammer will start idling again.
 ' 
 ' A jumper is also provided to disable the serial break, i.e. 
 ' Jumper not installed = insert serial break
@@ -32,7 +33,7 @@ symbol IDLE_TIME_BEFORE_BREAK_S = 5 ' the serial break will be reestablished aft
 symbol hseroutPin = C.0
 symbol ctsPin = C.4
 
-symbol breakJumper = pinC.3 ' if jumper is installed (bridge to ground) then insert serial break, otherwise don't.
+symbol breakJumper = pinC.3 ' if jumper is not installed (bridge to ground) then insert serial break, otherwise don't.
 symbol picaxeReply = pinC.2	' 
 symbol sendingbreak = b0
 symbol byteRX = w1
@@ -43,101 +44,16 @@ symbol programdetected = w4
 symbol waittime = w5
 symbol toggletimeout = b12
 
-;'pullup %00001000	' enable pullup on pinC.3
-;
-;dirs = %00001  ' C.0 output (hserout), all others inputs.
-;
-;'  HSERSETUP B4800_4, %01010 ' HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_OFF 
-;
-;'algorithm is:
-;' a) As soon as CTS goes high, start sending continous serial breaks 
-;' b) As soon as a serial reply is detected, stop sending breaks and start passing through
-;' c) Once CTS goes low, stop passing through and return to a)
-;
-;ctsPinLow:
-;  HSERSETUP B4800_4, %00010 'HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_ON
-;  hserin byteRX             ; clear the buffer if anything still in there
-;	hserin byteRX             ; clear the buffer if anything still in there
-;
-;waitforCTShigh:
-;	do
-;		b0 = b0 & %10000  'pin4 = CTS in
-;	loop until b0 <> 0
-;
-;  hserin byteRX             ; clear the buffer if anything still in there
-;	hserin byteRX             ; clear the buffer if anything still in there
-;
-;serialBreakUntilReply:
-;	do 
-;	  hserout 1, ("")
-;		b0 = b0 & %10100		'pin4 = CTS in, pin 2 = PICAXE reply
-;	loop until b0 <> %10000
-;	b0 = b0 & %10000
-;	if b0 = 0 then ctsPinLow
-;	
-;passthrough:
-;	b0 = b0 & %10000
-;	do 
-;	  byteRX = $FFFF            ; set up a non-valid value
-;	  hserin byteRX             ; receive 1 byte into w1
-;		if byteRX <> $FFFF then 
-;		  hserout 0, (byteRXlsb) ' lsb of w1
-;		else
-;		  b0 = pins & %10000
-;		end if	
-;	loop until b0 = 0
-;	
-;	goto ctsPinLow
-;
-;
-;'algorithm is:
-;' a) As soon as CTS goes high, start sending continous serial breaks while attempting to pass through
-;' b) Once pass through is detected, passthrough without serial breaks.
-;' c) Once CTS goes low, stop passing through and return to a)
-;
-;ctsPinLow:
-;
-;  HSERSETUP B4800_4, %00010 'HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_ON
-;  hserin byteRX             ; clear the buffer if anything still in there
-;	hserin byteRX             ; clear the buffer if anything still in there
-;
-;waitforpassthrough:
-;	b0 = b0 & %10000
-;	do 
-;	  byteRX = $FFFF            ; set up a non-valid value
-;	  hserin byteRX             ; receive 1 byte into w1
-;		if byteRX <> $FFFF then 
-;		  hserout 0, (byteRXlsb) ' lsb of w1
-;			goto passthrough
-;		else
-;		  hserout 1, ("")
-;		  b0 = pins & %10000
-;		end if	
-;	loop until b0 = 0
-;	
-;	goto ctsPinLow
-;	
-;passthrough:
-;	b0 = b0 & %10000
-;	do 
-;	  byteRX = $FFFF            ; set up a non-valid value
-;	  hserin byteRX             ; receive 1 byte into w1
-;		if byteRX <> $FFFF then 
-;		  hserout 0, (byteRXlsb) ' lsb of w1
-;		else
-;		  b0 = pins & %10000
-;		end if	
-;	loop until b0 = 0
-;	
-;	goto ctsPinLow
 
 'algorithm is:
 ' a) Starting conditions: CTS is low
 ' b) Keep serout low
 ' c) As soon as CTS goes high:
-'    i) perform a break for then wait until the picaxe reply goes high
-'    ii) start passing through
+'    i) perform a break for 3 ms then wait until the picaxe reply goes high
+'    ii) drop the break and start passing through
 ' d) Once CTS goes low, stop passing through and return to a)
+' If pin C.3 is low (jumper installed) stay in passthrough only
+
 ctsPinLow:
 
 	HSERSETUP B4800_4, %01010 ' HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_OFF 
@@ -147,8 +63,10 @@ ctsPinLow:
 	
 waitForCtsPinHigh:
 	do 
-		let b0 = pins & %10000 'C.4 is CTS
-	loop until b0 <> 0
+		let b0 = pins & %11000 'C.4 is CTS, C.3 is passthrough mode
+	loop until b0 <> %01000		' until C.4 high or C.3 low
+  b0 = b0 & %01000
+	if b0 = 0 then passthroughOnly
 
 ctsPinHigh:
 	high hseroutPin
@@ -163,124 +81,34 @@ waitforfirstprogrambyte:
   HSERSETUP B4800_4, %00010 'HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_ON
 
 passthrough:
-	b0 = b0 & %10000
+	b0 = b0 & %11000
 	do 
 	  byteRX = $FFFF            ; set up a non-valid value
 	  hserin byteRX             ; receive 1 byte into w1
 		if byteRX <> $FFFF then 
 		  hserout 0, (byteRXlsb) ' lsb of w1
 	  else
-		  b0 = pins & %10000
+		  b0 = pins & %11000
 		end if	
-	loop until b0 = 0
+	loop until b0 <> %11000			; until C.4 low or C.3 low
 	
 	goto ctsPinLow
 
-
-;' algorithm is:
-;' 1) Trigger a serial break
-;' 2) Wait 10 ms
-;' 3) Once the serial reply from PICAXE goes high, set the transmit line low
-;' 4) Start serial receive on serin from PC.  Timeout after 2 seconds.
-;' 5) If serial was received, continue to relay.  Otherwise, trigger the break again (repeat from 1)
-;
-;triggerbreak:
-;'	if breakJumper = 1 then prepforwaitnext
-;	HSERSETUP B4800_4, %01010 ' HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_OFF 
-;	high hseroutPin
-;	pause 10
-;	do 
-;	  let b0 = pins & %100 ' C.2 is reply serial from picaxe being programmed
-;	loop until b0 <> 0
-;
-;waitforfirstprogrambyte:		
-;	lasttime = time
-;	programdetected = 0
-;	low hseroutPin
-;  HSERSETUP B4800_4, %00010 'HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_ON
-;	do 
-;	  byteRX = $FFFF            ; set up a non-valid value
-;	  hserin byteRX             ; receive 1 byte into w1
-;		
-;		if byteRX <> $FFFF then 
-;			programdetected = 1
-;		else
-;		  delta = time - lasttime
-;		if delta > BREAK_WAIT_S then 
-;			goto triggerbreak		
-;		end if	
-;		endif
-;	loop until programdetected = 1
-;	
-;passingthrough:
-;  hserout 0, (byteRXlsb) ' lsb of w1
-;	
-;prepforwaitnext:	
-;	lasttime = time
-;	
-;waitnext:
-;  byteRX = $FFFF            ; set up a non-valid value
-;	hserin byteRX             ; receive 1 byte into w1
-;	if byteRX = $FFFF then
-;		delta = time - lasttime
-;		if delta > IDLE_TIME_BEFORE_BREAK_S then 
-;			goto triggerbreak		
-;		end if	
-;	  goto waitnext
-;  end if	
-;
-;	goto passingthrough
-
-;	do 
-;	 let b0 = pins & %101000 
-;	  byteRX = $FFFF            ; set up a non-valid value
-;	  hserin byteRX             ; receive 1 byte into w1
-;		
-;		if byteRX <> $FFFF then 'or breakJumper = 1 then
-;			stopbreak = 1
-;		else
-;		  stopbreak = 0
-;		endif
-;	loop until stopbreak = 1
-
-
-
-;serialbreak:
-;  HSERSETUP B4800_4, %01010 ' HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_OFF 
-;  high hseroutPin
-;
-;	do 
-;	  byteRX = $FFFF            ; set up a non-valid value
-;	  hserin byteRX             ; receive 1 byte into w1
-;		
-;		if byteRX <> $FFFF then 'or breakJumper = 1 then
-;			stopbreak = 1
-;		else
-;		  stopbreak = 0
-;		endif
-;	loop until stopbreak = 1
-;		
-;receiving:		
-;	low hseroutPin
-;	pause ENDBREAK_DELAY_MS
-;  HSERSETUP B4800_4, %00010 'HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_ON
-;
-;passingthrough:
-;  hserout 0, (byteRXlsb) ' lsb of w1
-;	lasttime = time
-;	
-;waitnext:
-;  byteRX = $FFFF            ; set up a non-valid value
-;	hserin byteRX             ; receive 1 byte into w1
-;	if byteRX = $FFFF then
-;		delta = time - lasttime
-;		if delta > IDLE_TIME_BEFORE_BREAK_S then 'and breakJumper = 0 then
-;			goto serialbreak		
-;		end if	
-;	  goto waitnext
-;  end if	
-;
-;	goto passingthrough
+passthroughOnly:
+	low hseroutPin
+  HSERSETUP B4800_4, %00010 'HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_ON
+	b0 = b0 & %01000			; C.3 low is passthrough mode
+	do 
+	  byteRX = $FFFF            ; set up a non-valid value
+	  hserin byteRX             ; receive 1 byte into w1
+		if byteRX <> $FFFF then 
+		  hserout 0, (byteRXlsb) ' lsb of w1
+	  else
+		  b0 = pins & %01000
+		end if	
+	loop until b0 <> 0
+	
+	goto ctsPinLow
 
 	
   	

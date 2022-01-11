@@ -16,21 +16,35 @@
  
  Some USB-to-serial adapters don't send a serial break, so the PICAXE never enters programming mode.
  
- With some deft timing this can be done manually - start a download, briefly short the serial input to 5V and with a 
- bit of luck the download will work.
+ With some deft timing and patience this can be done manually - start a download, briefly short the serial input to 5V with a 10k resistor and with a 
+ bit of luck the download will work.  Unless your PICAXE needs all five pins and hence uses the disconnect command, in which case it is a real pain in butt.
  
 Alternatively you can use a PICAXE "SerialFixer" to add a serial break:
-1. The SerialFixer is connected between the USB-to-serial adapter and the PICAXE being programmed 
-2. When idle, the SerialFixer sends a high output to the serial input of the PICAXE being programmed.  This causes
-    the picaxe to enter programming mode and to start sending its signature block.
-3. When programming starts, the SerialFixer detects the transmission from the USB-to-serial adapter and then
-  a. briefly (~ 4 bits) sends a low output to the PICAXE being programmed, then
-  b. passes the serial transmission from the programmer directly to the PICAXE being programmed (with a short buffer
-      delay to account for the 4 bits added at the end of the serial break)
-      
-When transmission has stopped for 5 seconds, the SerialFixer re-enters the idle state.
+Step by step:
+ 1) Connect PC to PICAXEprogrammer and PICAXEprogrammer to the PICAXE to be programmed
+ 2) Power up the PICAXEprogrammer
+ 2a) Optional: Power up the PICAXE to be programmed, if it doesn't use the disconnect command
+ 3) Start the program download.  The PICAXEprogrammer will start sending a break.
+ 3a) Optional: if the PICAXE to be programmed isn't already on, turn it on now
+ 4) Once the PICAXEprogrammer detects a reply from the PICAXE being programmed, it stops sending break and will pass through
+    the transmission from the PC to the PICAXE.
+ 5) Once the programming is finished, the PICAXEprogrammer will start idling again.
+
+It's not 100% reliable- you may need to try the download a couple of times, but in my experience most of the time it will work first attempt.      
 
 The jumper on the SerialFixer board can be used to disable the break, i.e.:
-Jumper installed = insert serial break
-Jumper not installed = passthrough only (do not insert a break)
+Jumper not installed = insert serial break
+Jumper installed = passthrough only (do not insert a break)
+
+## Footnote
+You might be asking yourself why I went to all this trouble?
+
+I'd have to have rocks in my head given that the official AXE027 cable (https://picaxe.com/hardware/cables/picaxe-usb-download-cable/) costs a lot less
+than the time and effort to build this circuit!
+
+Unless, of course, COVID-19 had pushed out the estimated delivery time to 3 months...
+
+
+
+
 
