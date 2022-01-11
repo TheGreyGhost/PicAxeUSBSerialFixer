@@ -43,68 +43,120 @@ symbol programdetected = w4
 symbol waittime = w5
 symbol toggletimeout = b12
 
-'pullup %00001000	' enable pullup on pinC.3
-
-dirs = %00001  ' C.0 output (hserout), all others inputs.
-
-'  HSERSETUP B4800_4, %01010 ' HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_OFF 
+;'pullup %00001000	' enable pullup on pinC.3
+;
+;dirs = %00001  ' C.0 output (hserout), all others inputs.
+;
+;'  HSERSETUP B4800_4, %01010 ' HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_OFF 
+;
+;'algorithm is:
+;' a) As soon as CTS goes high, start sending continous serial breaks 
+;' b) As soon as a serial reply is detected, stop sending breaks and start passing through
+;' c) Once CTS goes low, stop passing through and return to a)
+;
+;ctsPinLow:
+;  HSERSETUP B4800_4, %00010 'HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_ON
+;  hserin byteRX             ; clear the buffer if anything still in there
+;	hserin byteRX             ; clear the buffer if anything still in there
+;
+;waitforCTShigh:
+;	do
+;		b0 = b0 & %10000  'pin4 = CTS in
+;	loop until b0 <> 0
+;
+;  hserin byteRX             ; clear the buffer if anything still in there
+;	hserin byteRX             ; clear the buffer if anything still in there
+;
+;serialBreakUntilReply:
+;	do 
+;	  hserout 1, ("")
+;		b0 = b0 & %10100		'pin4 = CTS in, pin 2 = PICAXE reply
+;	loop until b0 <> %10000
+;	b0 = b0 & %10000
+;	if b0 = 0 then ctsPinLow
+;	
+;passthrough:
+;	b0 = b0 & %10000
+;	do 
+;	  byteRX = $FFFF            ; set up a non-valid value
+;	  hserin byteRX             ; receive 1 byte into w1
+;		if byteRX <> $FFFF then 
+;		  hserout 0, (byteRXlsb) ' lsb of w1
+;		else
+;		  b0 = pins & %10000
+;		end if	
+;	loop until b0 = 0
+;	
+;	goto ctsPinLow
+;
+;
+;'algorithm is:
+;' a) As soon as CTS goes high, start sending continous serial breaks while attempting to pass through
+;' b) Once pass through is detected, passthrough without serial breaks.
+;' c) Once CTS goes low, stop passing through and return to a)
+;
+;ctsPinLow:
+;
+;  HSERSETUP B4800_4, %00010 'HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_ON
+;  hserin byteRX             ; clear the buffer if anything still in there
+;	hserin byteRX             ; clear the buffer if anything still in there
+;
+;waitforpassthrough:
+;	b0 = b0 & %10000
+;	do 
+;	  byteRX = $FFFF            ; set up a non-valid value
+;	  hserin byteRX             ; receive 1 byte into w1
+;		if byteRX <> $FFFF then 
+;		  hserout 0, (byteRXlsb) ' lsb of w1
+;			goto passthrough
+;		else
+;		  hserout 1, ("")
+;		  b0 = pins & %10000
+;		end if	
+;	loop until b0 = 0
+;	
+;	goto ctsPinLow
+;	
+;passthrough:
+;	b0 = b0 & %10000
+;	do 
+;	  byteRX = $FFFF            ; set up a non-valid value
+;	  hserin byteRX             ; receive 1 byte into w1
+;		if byteRX <> $FFFF then 
+;		  hserout 0, (byteRXlsb) ' lsb of w1
+;		else
+;		  b0 = pins & %10000
+;		end if	
+;	loop until b0 = 0
+;	
+;	goto ctsPinLow
 
 'algorithm is:
 ' a) Starting conditions: CTS is low
-' b) Raise serout high (serial break)
-' c) Maintain break until CTS goes high
-' d) If CTS goes high while serial reply is toggling, then 
-'    i) wait until toggling stops (goes low)
-'    ii) maintain break until serial reply starts toggling
-'    iii) terminate the break then start passing through 
-' e) If CTS goes high while serial reply is not toggling, then 
-'    ii) maintain break until serial reply starts toggling
-'    iii) terminate the break then start passing through 
-' f) Once CTS goes low, stop passing through and start serial break again
-
+' b) Keep serout low
+' c) As soon as CTS goes high:
+'    i) perform a break for then wait until the picaxe reply goes high
+'    ii) start passing through
+' d) Once CTS goes low, stop passing through and return to a)
 ctsPinLow:
 
 	HSERSETUP B4800_4, %01010 ' HSEROUT_N_POLARITY | HSERIN_T_POLARITY | HSEROUT_OFF 
-	high hseroutPin
+	low hseroutPin
   hserin byteRX             ; clear the buffer if anything still in there
 	hserin byteRX             ; clear the buffer if anything still in there
 	
 waitForCtsPinHigh:
-	let b0 = pins & %10000 'C.4 is CTS
-	if b0 <> 0 then 
-		goto ctsPinHigh
-	endif	
-  let b1 = pins & %100 ' C.2 is reply serial from picaxe being programmed
-	if b1 <> 0 then
-		toggletimeout = 20
-	else
-	  if toggletimeout > 0 then 
-			dec toggletimeout 
-		endif
-	endif
-  goto waitForCtsPinHigh
+	do 
+		let b0 = pins & %10000 'C.4 is CTS
+	loop until b0 <> 0
 
 ctsPinHigh:
-	do until toggletimeout = 0 
-	  let b1 = pins & %100 ' C.2 is reply serial from picaxe being programmed
-		if b1 <> 0 then
-			toggletimeout = 20
-		else
-		  if toggletimeout > 0 then 
-				dec toggletimeout 
-			endif	
-		endif
-	loop
-  
-waitUntilToggling:
+	high hseroutPin
+	pause 3
+	
 	do 
-	  let b0 = pins & %10100 'C.4 is CTS, C.2 is reply serial from picaxe being programmed
-	loop until b0 <> %10000
-
-	b0 = b0 & %10000
-	if b0 = 0 then 
-		 goto ctsPinLow
-	endif
+	  let b1 = pins & %100 ' C.2 is reply serial from picaxe being programmed
+	loop until b1 <> 0
 	
 waitforfirstprogrambyte:		
 	low hseroutPin
@@ -123,6 +175,7 @@ passthrough:
 	loop until b0 = 0
 	
 	goto ctsPinLow
+
 
 ;' algorithm is:
 ;' 1) Trigger a serial break
